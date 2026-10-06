@@ -1,0 +1,9 @@
+{
+  "name": "AutoWelcome",
+  "description": "Automatically greets new members when Discord posts a welcome message in the channel.",
+  "authors": [{ "name": "You", "id": "0" }],
+  "main": "index.js",
+  "vendetta": {
+    "icon": "ic_message_edit"
+  }
+}
