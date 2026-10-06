@@ -1,9 +1,15 @@
 {
-  "name": "AutoWelcome",
-  "description": "Automatically greets new members when Discord posts a welcome message in the channel.",
-  "authors": [{ "name": "You", "id": "0" }],
-  "main": "index.js",
-  "vendetta": {
-    "icon": "ic_message_edit"
-  }
+    "name": "AutoWelcome",
+    "description": "Automatically greets new members when Discord posts a welcome message in the channel.",
+    "authors": [
+        {
+            "name": "you",
+            "id": "0"
+        }
+    ],
+    "main": "index.js",
+    "vendetta": {
+        "icon": "ic_message_edit"
+    },
+    "hash": "612ea35d42f3e70182a5fc209dafded55d5db2eb35715150f44768fedb7a54a6"
 }
