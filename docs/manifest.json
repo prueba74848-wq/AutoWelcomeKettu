@@ -1,6 +1,6 @@
 {
     "name": "AutoWelcome",
-    "description": "Automatically greets new members when Discord posts a welcome message in the channel.",
+    "description": "Automatically replies to new member join messages with a random default Discord sticker, like the Wave to say hi button.",
     "authors": [
         {
             "name": "you",
@@ -11,5 +11,5 @@
     "vendetta": {
         "icon": "ic_message_edit"
     },
-    "hash": "612ea35d42f3e70182a5fc209dafded55d5db2eb35715150f44768fedb7a54a6"
+    "hash": "73fbd44a799a67b95e0ed78208af1ede51fd13214ad47ef567b40cf1221763e8"
 }

@@ -3,16 +3,11 @@
   var module = { exports: {} };
 
   var CONFIG = {
+    // Leave empty to greet in every server, or put guild IDs here to limit it
     guildIds: [],
-    minDelay: 1500,
-    maxDelay: 4000,
-    reply: true,
-    messages: [
-      "Welcome to the server, {user}! 👋",
-      "Hey {user}, glad you're here! Make yourself at home 🎉",
-      "Welcome aboard, {user}! Don't be shy, say hi 😄",
-      "{user} just joined, welcome! 🥳"
-    ]
+    // Delay before sending, in ms (random between min and max)
+    minDelay: 1000,
+    maxDelay: 3000
   };
 
   var findByProps = vendetta.metro.findByProps;
@@ -24,9 +19,46 @@
 
   var USER_JOIN = 7;
   var greeted = new Set();
+  var stickerIds = [];
+
+  // Discord's default sticker packs (public endpoint, no login needed)
+  function loadStickers() {
+    return fetch("https://discord.com/api/v10/sticker-packs")
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        var ids = [];
+        (data.sticker_packs || []).forEach(function (pack) {
+          (pack.stickers || []).forEach(function (s) { ids.push(s.id); });
+        });
+        if (ids.length) stickerIds = ids;
+        return ids;
+      })
+      .catch(function (e) {
+        logger.error("[AutoWelcome] could not load stickers", e);
+        return [];
+      });
+  }
 
   function pick(list) {
     return list[Math.floor(Math.random() * list.length)];
+  }
+
+  function sendSticker(message) {
+    var stickerId = pick(stickerIds);
+    MessageActions.sendMessage(
+      message.channel_id,
+      { content: "", tts: false, invalidEmojis: [], validNonShortcutEmojis: [] },
+      undefined,
+      {
+        stickerIds: [stickerId],
+        messageReference: {
+          guild_id: message.guild_id,
+          channel_id: message.channel_id,
+          message_id: message.id
+        },
+        allowedMentions: { parse: ["users"], replied_user: true }
+      }
+    );
   }
 
   function onMessage(event) {
@@ -41,27 +73,16 @@
       var userId = message.author && message.author.id;
       if (!userId || (me && userId === me.id)) return;
 
-      var content = pick(CONFIG.messages).replace("{user}", "<@" + userId + ">");
       var delay = CONFIG.minDelay + Math.random() * Math.max(0, CONFIG.maxDelay - CONFIG.minDelay);
 
       setTimeout(function () {
-        var extra = CONFIG.reply
-          ? {
-              messageReference: {
-                guild_id: message.guild_id,
-                channel_id: message.channel_id,
-                message_id: message.id
-              },
-              allowedMentions: { parse: ["users"], replied_user: true }
-            }
-          : { allowedMentions: { parse: ["users"] } };
-
-        MessageActions.sendMessage(
-          message.channel_id,
-          { content: content, tts: false, invalidEmojis: [], validNonShortcutEmojis: [] },
-          undefined,
-          extra
-        );
+        if (stickerIds.length) {
+          sendSticker(message);
+        } else {
+          loadStickers().then(function (ids) {
+            if (ids.length) sendSticker(message);
+          });
+        }
       }, delay);
     } catch (e) {
       logger.error("[AutoWelcome] failed to greet", e);
@@ -70,6 +91,7 @@
 
   module.exports = {
     onLoad: function () {
+      loadStickers();
       FluxDispatcher.subscribe("MESSAGE_CREATE", onMessage);
     },
     onUnload: function () {
